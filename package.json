@@ -4,7 +4,8 @@
   "description": "Bot de discord",
   "main": "index.js",
   "dependencies": {
-    "discord.js": "^12.4.1"
+    "discord.js": "^12.4.1",
+    "wokcommands": "^1.0.1"
   },
   "devDependencies": {},
   "scripts": {
