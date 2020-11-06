@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "discord.js": "^12.4.1",
+    "mongoose": "^5.10.12",
     "wokcommands": "^1.0.1"
   },
   "devDependencies": {},

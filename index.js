@@ -1,28 +1,39 @@
-const Discord = require("discord.js")
-const client = new Discord.Client();
-const WOKcommands = require("wokcommands");
-require("dotenv").config()
-
-const config = require("./config.json");
-
-const token = config.token;
+const Discord = require('discord.js');
+const mongo = require('mongoose');
+const client = new Discord.Client()
 
 
-client.on("ready", () => {
-    new WOKcommands(client, "commands", "features")
-    .setSyntaxError("Uso incorrecto del comando.")
-    .setDefaultPrefix("?");
-    console.log("Im ready!");
+const loadCommands = require('./commands/load-commands')
+
+const config = require('./config.json');
+const inventory = require('./src/functions/inventoryfunc')
+
+client.on('ready', async () => {
+    console.log('I\'m ready!');
+    loadCommands(client)
+
+    mongo.connect(config.mongoPath, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).then(mongo => console.log('Mongo connection is ready'))
 });
 
-client.on("message", message => {
-    if(message.content === "ping"){
-        message.reply("PONG!")
-    }
-    if(message.author.id === "391336623234744340" && message.content === "ping"){
-        message.reply("Eres molesto ¿Sabes?")
-    }
-});
+client.on("guildMemberAdd", async member => {
+    await inventory.getInventory(member.id).then(user => {
+        if(!user){
+            inventory.newInventoryUser(member.user.id, member.user.username).then(doc => {
+                const embed = new Discord.MessageEmbed()
+                    .setTitle('Bienvenido a ' + member.guild.name)
+                    .setThumbnail(member.guild.iconURL({dynamic: true}))
+                    .setAuthor('Zareke RP Bot', config.botIcon)
+                    .setDescription('Se te acaba de crear una cuenta de banco')
+                    .addField('Numero de cuenta', doc.user.activeaccount.numberAccount)
+                    .addField('Contraseña', doc.user.activeaccount.password)
+                return member.send(embed)
+            })
+        }
+    })
+    
+})
 
-
-client.login(token);
+client.login(config.token);
